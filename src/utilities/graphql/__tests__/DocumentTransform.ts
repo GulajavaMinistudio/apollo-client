@@ -1,8 +1,13 @@
-import { DocumentTransform } from "../DocumentTransform";
-import { isMutationOperation, isQueryOperation } from "../operations";
-import { removeDirectivesFromDocument } from "../transform";
+import type { DocumentNode } from "graphql";
+import { Kind, visit } from "graphql";
 import { gql } from "graphql-tag";
-import { DocumentNode, visit, Kind } from "graphql";
+
+import {
+  DocumentTransform,
+  isMutationOperation,
+  isQueryOperation,
+} from "@apollo/client/utilities";
+import { removeDirectivesFromDocument } from "@apollo/client/utilities/internal";
 
 function stripDirective(directive: string) {
   return (document: DocumentNode) => {
@@ -672,5 +677,5 @@ test("errors when passing a document that has not been parsed with `gql`", () =>
 
   expect(() => {
     documentTransform.transformDocument(query as unknown as DocumentNode);
-  }).toThrowError(/wrap the query string in a "gql" tag/);
+  }).toThrow(/wrap the query string in a "gql" tag/);
 });

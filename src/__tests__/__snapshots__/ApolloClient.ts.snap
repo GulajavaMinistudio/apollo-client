@@ -1,7 +1,12 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ApolloClient constructor will throw an error if cache is not passed in 1`] = `
 "To initialize Apollo Client, you must specify a 'cache' property in the options object. 
+For more information, please visit: https://go.apollo.dev/c/docs"
+`;
+
+exports[`ApolloClient constructor will throw an error if link is not passed in 1`] = `
+"To initialize Apollo Client, you must specify a 'link' property in the options object. 
 For more information, please visit: https://go.apollo.dev/c/docs"
 `;
 

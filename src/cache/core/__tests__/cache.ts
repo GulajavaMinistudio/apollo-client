@@ -1,16 +1,20 @@
-import gql from "graphql-tag";
-import { ApolloCache } from "../cache";
-import { Cache, DataProxy } from "../..";
-import { Reference } from "../../../utilities/graphql/storeUtils";
 import { expectTypeOf } from "expect-type";
+import type { FragmentDefinitionNode, InlineFragmentNode } from "graphql";
+import { gql } from "graphql-tag";
 
-class TestCache extends ApolloCache<unknown> {
+import type { OperationVariables, Unmasked } from "@apollo/client";
+import type { Cache } from "@apollo/client/cache";
+import { ApolloCache } from "@apollo/client/cache";
+
+import type { Reference } from "../../../utilities/graphql/storeUtils.js";
+
+class TestCache extends ApolloCache {
   constructor() {
     super();
   }
 
-  public diff<T>(query: Cache.DiffOptions): DataProxy.DiffResult<T> {
-    return {};
+  public diff<T>(query: Cache.DiffOptions<T>): Cache.DiffResult<T> {
+    return { result: null, complete: false };
   }
 
   public evict(): boolean {
@@ -21,20 +25,26 @@ class TestCache extends ApolloCache<unknown> {
     return undefined;
   }
 
-  public performTransaction(
-    transaction: <TSerialized>(c: ApolloCache<TSerialized>) => void
-  ): void {
+  public fragmentMatches(
+    fragment: InlineFragmentNode | FragmentDefinitionNode,
+    typename: string
+  ): boolean {
+    return true;
+  }
+
+  public performTransaction(transaction: (c: ApolloCache) => void): void {
     transaction(this);
   }
 
-  public read<T, TVariables = any>(
-    query: Cache.ReadOptions<TVariables>
-  ): T | null {
+  public read<
+    TData = unknown,
+    TVariables extends OperationVariables = OperationVariables,
+  >(query: Cache.ReadOptions<TData, TVariables>): Unmasked<TData> | null {
     return null;
   }
 
   public recordOptimisticTransaction(
-    transaction: <TSerialized>(c: ApolloCache<TSerialized>) => void,
+    transaction: (c: ApolloCache) => void,
     id: string
   ): void {}
 
@@ -44,17 +54,21 @@ class TestCache extends ApolloCache<unknown> {
     return new Promise<void>(() => null);
   }
 
-  public restore(serializedState: unknown): ApolloCache<unknown> {
+  public restore(serializedState: unknown) {
     return this;
   }
 
-  public watch(watch: Cache.WatchOptions): () => void {
+  public watch<
+    T = unknown,
+    TVariables extends OperationVariables = OperationVariables,
+  >(watch: Cache.WatchOptions<T, TVariables>): () => void {
     return function () {};
   }
 
-  public write<TResult = any, TVariables = any>(
-    _: Cache.WriteOptions<TResult, TVariables>
-  ): Reference | undefined {
+  public write<
+    TResult = unknown,
+    TVariables extends OperationVariables = OperationVariables,
+  >(_: Cache.WriteOptions<TResult, TVariables>): Reference | undefined {
     return;
   }
 }
@@ -84,7 +98,7 @@ describe("abstract cache", () => {
       test.read = jest.fn();
 
       test.readQuery({ query });
-      expect(test.read).toBeCalled();
+      expect(test.read).toHaveBeenCalled();
     });
 
     it("defaults optimistic to false", () => {
@@ -110,7 +124,7 @@ describe("abstract cache", () => {
       };
 
       test.readFragment(fragment);
-      expect(test.read).toBeCalled();
+      expect(test.read).toHaveBeenCalled();
     });
 
     it("defaults optimistic to false", () => {
@@ -139,7 +153,7 @@ describe("abstract cache", () => {
         query: query,
         data: "foo",
       });
-      expect(test.write).toBeCalled();
+      expect(test.write).toHaveBeenCalled();
     });
   });
 
@@ -158,7 +172,7 @@ describe("abstract cache", () => {
       };
 
       test.writeFragment(fragment);
-      expect(test.write).toBeCalled();
+      expect(test.write).toHaveBeenCalled();
     });
   });
 
@@ -170,8 +184,8 @@ describe("abstract cache", () => {
 
       test.updateQuery({ query }, (data) => "foo");
 
-      expect(test.readQuery).toBeCalled();
-      expect(test.writeQuery).toBeCalled();
+      expect(test.readQuery).toHaveBeenCalled();
+      expect(test.writeQuery).toHaveBeenCalled();
     });
 
     it("does not call writeQuery method if data is null", () => {
@@ -181,8 +195,8 @@ describe("abstract cache", () => {
 
       test.updateQuery({ query }, (data) => null);
 
-      expect(test.readQuery).toBeCalled();
-      expect(test.writeQuery).not.toBeCalled();
+      expect(test.readQuery).toHaveBeenCalled();
+      expect(test.writeQuery).not.toHaveBeenCalled();
     });
 
     it("does not call writeQuery method if data is undefined", () => {
@@ -194,8 +208,8 @@ describe("abstract cache", () => {
         return;
       });
 
-      expect(test.readQuery).toBeCalled();
-      expect(test.writeQuery).not.toBeCalled();
+      expect(test.readQuery).toHaveBeenCalled();
+      expect(test.writeQuery).not.toHaveBeenCalled();
     });
 
     it("calls the readQuery & writeQuery methods with the options object", () => {
@@ -212,9 +226,11 @@ describe("abstract cache", () => {
 
       test.updateQuery(options, (data) => "foo");
 
-      expect(test.readQuery).toBeCalledWith(expect.objectContaining(options));
+      expect(test.readQuery).toHaveBeenCalledWith(
+        expect.objectContaining(options)
+      );
 
-      expect(test.writeQuery).toBeCalledWith(
+      expect(test.writeQuery).toHaveBeenCalledWith(
         expect.objectContaining({ ...options, data: "foo" })
       );
     });
@@ -259,8 +275,8 @@ describe("abstract cache", () => {
 
       test.updateFragment({ id: fragmentId, fragment }, (data) => "foo");
 
-      expect(test.readFragment).toBeCalled();
-      expect(test.writeFragment).toBeCalled();
+      expect(test.readFragment).toHaveBeenCalled();
+      expect(test.writeFragment).toHaveBeenCalled();
     });
 
     it("does not call writeFragment method if data is null", () => {
@@ -270,8 +286,8 @@ describe("abstract cache", () => {
 
       test.updateFragment({ id: fragmentId, fragment }, (data) => null);
 
-      expect(test.readFragment).toBeCalled();
-      expect(test.writeFragment).not.toBeCalled();
+      expect(test.readFragment).toHaveBeenCalled();
+      expect(test.writeFragment).not.toHaveBeenCalled();
     });
 
     it("does not call writeFragment method if data is undefined", () => {
@@ -283,8 +299,8 @@ describe("abstract cache", () => {
         return;
       });
 
-      expect(test.readFragment).toBeCalled();
-      expect(test.writeFragment).not.toBeCalled();
+      expect(test.readFragment).toHaveBeenCalled();
+      expect(test.writeFragment).not.toHaveBeenCalled();
     });
 
     it("calls the readFragment & writeFragment methods with the options object", () => {
@@ -303,11 +319,11 @@ describe("abstract cache", () => {
 
       test.updateFragment(options, (data) => "foo");
 
-      expect(test.readFragment).toBeCalledWith(
+      expect(test.readFragment).toHaveBeenCalledWith(
         expect.objectContaining(options)
       );
 
-      expect(test.writeFragment).toBeCalledWith(
+      expect(test.writeFragment).toHaveBeenCalledWith(
         expect.objectContaining({ ...options, data: "foo" })
       );
     });
@@ -545,7 +561,7 @@ describe.skip("Cache type tests", () => {
     test("Allows partial return data", () => {
       const cache = new TestCache();
       cache.modify<{
-        union: Array<
+        union: ReadonlyArray<
           | { __typename: "Type1"; a: string; c: { foo: string } }
           | { __typename: "Type2"; b: string; d: { bar: number } }
         >;

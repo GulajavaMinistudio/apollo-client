@@ -1,6 +1,6 @@
 # 🔮 Apollo Client Ecosystem Roadmap
 
-**Last updated: 2025-05-07**
+**Last updated: 2026-01-07**
 
 For up to date release notes, refer to the project's [Changelog](https://github.com/apollographql/apollo-client/blob/main/CHANGELOG.md).
 
@@ -17,41 +17,41 @@ For up to date release notes, refer to the project's [Changelog](https://github.
 
 ### Apollo Client
 
-#### 3.14.0 - June 5th, 2025
-_Release candidate - May 29th, 2025
+#### 4.1.0
 
-- 4.0 compatibility release/deprecations
+_Release candidate - January 7th, 2026_
 
-#### [4.0.0](https://github.com/apollographql/apollo-client/milestone/31) - June 10th, 2025
-_Release candidate - May 29th 2025_
+- Support for `@stream`
+- Add support for the `graphql@17.0.0-alpha.9` incremental delivery format
+- Improvements for existing incremental delivery implementation
+  - Improvements to array merging behavior
+  - Improvements to `readFragment`/`writeFragment` (add `from` option)
+- Add support for `useFragment`/`useSuspenseFragment` with arrays
 
 ### GraphQL Testing Library
 
-- New documentation
-- Subscription support
-
-_These changes will take longer than anticipated due to prioritization on Apollo Client 4.0_
+_No planned work_
 
 ### VSCode Extension
 
-_No outstanding work_
+_No planned work_
 
 ### GraphQL Tag
 
-- `Release 3.0` will be our next major release of `graphql-tag` and is still in planning. See Github [3.0 Milestone](https://github.com/apollographql/graphql-tag/milestone/3) for more details.
+_No planned work_
 
 ### Apollo Client DevTools
 
-- Memory panel
-
-_These changes will take longer than anticipated due to prioritization on Apollo Client 4.0_
+- Support for inspecting Apollo Client instances in iframes
 
 ### Apollo Client React Framework Integrations
 
-- New/more robust documentation
+- Client integration documentation
 
 **TanStack Start**
-- Support for Apollo Client Streaming in TanStack Router - will stay alpha
+
+- Support for Apollo Client Streaming in TanStack Start - will stay release candidate
 
 **React Router**
+
 - Support for Apollo Client Streaming in React Router 7 - will stay alpha
